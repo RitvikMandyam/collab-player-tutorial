@@ -1,0 +1,81 @@
+<html>
+<head>
+    <title>Test firestore</title>
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-flow: row nowrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .connected-text {
+            color: green;
+            font-family: sans-serif;
+            font-size: 3.6em;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="centered-content">
+        <h1 class="connected-text">Connected</h1>
+    </div>
+</div>
+
+
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-database.js"></script>
+<script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+        apiKey: "AIzaSyCDLb-jbyTL3S61iCAmIIeUm4f2ccZ9bH0",
+        authDomain: "collab-player.firebaseapp.com",
+        databaseURL: "https://collab-player.firebaseio.com",
+        projectId: "collab-player",
+        storageBucket: "collab-player.appspot.com",
+        messagingSenderId: "850427376471",
+        appId: "1:850427376471:web:12f54c4ea13dddc2"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+</script>
+<script src="firestore-functions.js"></script>
+<script>
+    firebase.auth().signInAnonymously().catch(function(error) {
+        // Handle Errors here.
+    });
+
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+            // User is signed in.
+            var userStatusFirestoreRef = setUpPresenceHooks();
+            userStatusFirestoreRef.onSnapshot(function(doc) {
+                var isOnline = doc.data().state == 'online';
+                if (isOnline) {
+                    document.querySelector('.connected-text').innerHTML = 'Connected';
+                    document.querySelector('.connected-text').style.color = 'green';
+                    joinSession('dA8N4fYeRJOjAGIGGYLk');
+                } else {
+                    document.querySelector('.connected-text').innerHTML = 'Disonnected';
+                    document.querySelector('.connected-text').style.color = 'red';
+                }
+            });
+        } else {
+            // User is signed out.
+        }
+    });
+</script>
+</body>
+</html>

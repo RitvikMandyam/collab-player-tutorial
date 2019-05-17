@@ -1,8 +1,22 @@
 var express = require('express');
+var exphbs  = require('express-handlebars');
+
 var app = express();
-var port = 3000;
 
-app.get('/', (req, res) =>  res.sendFile(__dirname + '/public/login.html'));
-app.get('/playlist', (req, res) =>  res.sendFile(__dirname + '/public/index.html'));
+app.set('views', 'public');
+app.engine('handlebars', exphbs({
+    defaultLayout: 'base',
+    helpers: {
+        section: function(name, options){
+            if(!this._sections) this._sections = {};
+            this._sections[name] = options.fn(this);
+            return null;
+        }
+    }}));
+app.set('view engine', 'handlebars');
 
-app.listen(port, '0.0.0.0');
+app.get('/', function (req, res) {
+    res.render('login');
+});
+
+app.listen(3000);

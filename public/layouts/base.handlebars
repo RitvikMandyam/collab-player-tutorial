@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+    <title>
+            Colab Player
+    </title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.light_green-orange.min.css" />
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/6.0.2/firebase-database.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyCDLb-jbyTL3S61iCAmIIeUm4f2ccZ9bH0",
+            authDomain: "collab-player.firebaseapp.com",
+            databaseURL: "https://collab-player.firebaseio.com",
+            projectId: "collab-player",
+            storageBucket: "collab-player.appspot.com",
+            messagingSenderId: "850427376471",
+            appId: "1:850427376471:web:12f54c4ea13dddc2"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    {{{_sections.head}}}
+
+    <style type="text/css">
+        .content-wrapper {
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    {{{body}}}
+</body>
+</html>
