@@ -87,6 +87,24 @@ function createSession() {
     }
 }
 
+function getAudio(id) {
+    var xmlhttp = new XMLHttpRequest();
+    var obj = null;
+    xmlhttp.open('GET', 'https://maple3142-ytdl.glitch.me/api?id=' + id, false);
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState == 4) {
+            if (xmlhttp.status == 200) {
+                obj = JSON.parse(xmlhttp.responseText)['adaptive'];
+                obj = obj.filter(function(e) {
+                    return e.type.includes('audio');
+                });
+            }
+        }
+    };
+    xmlhttp.send(null);
+    return obj;
+}
+
 function joinSession(sessionID) {
     var uid = firebase.auth().currentUser.uid;
     var userSessionRef = firebase.firestore().collection('sessions').doc(sessionID);
@@ -98,7 +116,19 @@ function addSong(url) {
         var sessionID = sessionStorage.getItem('sessionID');
         var userSessionRef = firebase.firestore().collection('sessions').doc(sessionID);
         var uid = firebase.auth().currentUser.uid;
-        userSessionRef.update({songs: firebase.firestore.FieldValue.arrayUnion({'url': url, 'user': firebase.firestore().doc('/status/' + uid)})})
+        userSessionRef.collection('songs').doc().set({'url': url, 'user': firebase.firestore().doc('/status/' + uid)});
     }
+}
+
+function createAudioSources(url, audioElement) {
+    var YouTubeRegex = /(.*?)(^|\/|v=)([a-z0-9_-]{11})(.*)?/gim;
+    var id = YouTubeRegex.exec(url)[3];
+    var source_objs = getAudio(id);
+    var sources_string = '';
+
+    for (var source_obj of source_objs) {
+        sources_string += `<source src="${source_obj['url']}" type="${source_obj['type']}">\n`;
+    }
+    audioElement.innerHTML = sources_string;
 }
 

@@ -1,6 +1,8 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const QRCode = require('qrcode');
+const ffmpeg = require('fluent-ffmpeg');
+const ffmpeg_static = require('ffmpeg-static');
+const ytdl = require('ytdl-core');
 admin.initializeApp();
 
 // Since this code will be running in the Cloud Functions environment
@@ -35,10 +37,28 @@ exports.onUserStatusChanged = functions.database.ref('/status/{uid}').onUpdate(
         // Otherwise, we convert the last_changed field to a Date
         eventStatus.last_changed = new Date(eventStatus.last_changed);
 
-        if (eventStatus.state == 'online') {
-                // The user is online in this situation. Generate some form of unique code, tie it to their current session and build a QR code out of it that they can share.
+        if (eventStatus.state === 'online') {
+            // The user is online in this situation. Generate some form of unique code, tie it to their current session and build a QR code out of it that they can share.
         }
 
         // ... and write it to Firestore.
         return userStatusFirestoreRef.set(eventStatus);
     });
+
+exports.fetchSong = functions.https.onRequest(
+    (req, res) => {
+        res.set('Access-Control-Allow-Origin', '*');
+
+        if (req.method === 'OPTIONS') {
+            // Send response to OPTIONS requests
+            res.set('Access-Control-Allow-Methods', 'GET');
+            res.set('Access-Control-Allow-Headers', 'Content-Type');
+            res.set('Access-Control-Max-Age', '3600');
+            res.status(204).send('');
+        } else {
+            const url = req.query.url;
+            ytdl(url, { quality: 'lowestaudio', filter: 'audioonly'})
+                .pipe(res);
+        }
+    }
+);

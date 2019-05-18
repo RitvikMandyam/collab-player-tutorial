@@ -1,33 +1,150 @@
 <html>
 <head>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
     <title>Test firestore</title>
     <style type="text/css">
+        * {
+            font-family: sans-serif;
+        }
+
         html, body {
             width: 100%;
             height: 100%;
             padding: 0;
             margin: 0;
         }
+
         .container {
             width: 100%;
             height: 100%;
             display: flex;
-            flex-flow: row nowrap;
+            flex-flow: column nowrap;
             align-items: center;
             justify-content: center;
         }
 
-        .connected-text {
-            color: green;
-            font-family: sans-serif;
-            font-size: 3.6em;
+        .centered-content {
+            width: 100%;
+            flex: 10;
+            display: flex;
+            flex-flow: column nowrap;
+            align-items: center;
+        }
+
+        .top-gutter, .bottom-gutter {
+            flex: 1;
+        }
+
+        .tracks-container {
+            flex: 9;
+            width: 80%;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+            display: flex;
+            flex-flow: column nowrap;
+        }
+
+        @media only screen and (max-width: 768px) {
+            .tracks-container {
+                width: 100%;
+                box-shadow: none;
+            }
+
+            .top-gutter, .bottom-gutter {
+                flex: 0;
+            }
+        }
+
+        .next-track-container {
+            flex: 1;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+            display: flex;
+            flex-flow: row nowrap;
+            position: relative;
+            padding: 16px;
+        }
+
+        .next-track-artwork-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .next-track-artwork, .track-artwork {
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            max-width: 80%;
+        }
+
+        .next-track-info-container {
+            flex: 3;
+            display: flex;
+            flex-flow: column nowrap;
+            justify-content: center;
+        }
+
+        .next-track-title {
+            font-size: xx-large;
+        }
+
+        .tracklist-container {
+            flex: 2;
+            list-style-type: none;
+            padding: 16px;
+        }
+
+        .track-info-container {
+            padding: 16px;
+            display: flex;
+            flex-flow: column nowrap;
+        }
+
+        .track-title {
+            font-size: larger;
+        }
+
+        .playing-track-container {
+            align-self: flex-end;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-flow: row nowrap;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 -3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
         }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="centered-content">
-        <h1 class="connected-text">Connected</h1>
+        <div class="top-gutter"></div>
+        <div class="tracks-container">
+            <div class="next-track-container">
+                <div class="next-track-artwork-container">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/70/Solid_white.svg"
+                         class="next-track-artwork">
+                </div>
+                <div class="next-track-info-container">
+                    <span class="next-track-title">No song</span>
+                    <span class="next-track-duration">0:00</span>
+                </div>
+            </div>
+            <table class="tracklist-container">
+                <tr class="track-container">
+                    <td class="track-artwork-container">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/70/Solid_white.svg" class="track-artwork">
+                    </td>
+                    <td class="track-info-container">
+                        <span class="track-title">No track</span>
+                        <span class="track-duration">0:00</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="bottom-gutter"></div>
+    </div>
+    <div class="playing-track-container">
+        <audio id="player" controls></audio>
     </div>
 </div>
 
@@ -53,23 +170,20 @@
 </script>
 <script src="firestore-functions.js"></script>
 <script>
-    firebase.auth().signInAnonymously().catch(function(error) {
+    firebase.auth().signInAnonymously().catch(function (error) {
         // Handle Errors here.
     });
 
-    firebase.auth().onAuthStateChanged(function(user) {
+    firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
             // User is signed in.
             var userStatusFirestoreRef = setUpPresenceHooks();
-            userStatusFirestoreRef.onSnapshot(function(doc) {
+            userStatusFirestoreRef.onSnapshot(function (doc) {
                 var isOnline = doc.data().state == 'online';
                 if (isOnline) {
-                    document.querySelector('.connected-text').innerHTML = 'Connected';
-                    document.querySelector('.connected-text').style.color = 'green';
-                    joinSession('dA8N4fYeRJOjAGIGGYLk');
+                    // User is online
                 } else {
-                    document.querySelector('.connected-text').innerHTML = 'Disonnected';
-                    document.querySelector('.connected-text').style.color = 'red';
+                    // User is offline
                 }
             });
         } else {
