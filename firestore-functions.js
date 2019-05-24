@@ -84,31 +84,38 @@ function createSession() {
         };
         userSessionRef.set(sessionObject);
         sessionStorage.setItem('sessionID', userSessionRef.id);
+        return userSessionRef;
+    } else {
+        return joinSession(sessionStorage.getItem('sessionID'));
     }
 }
 
 function getAudio(id) {
     var xmlhttp = new XMLHttpRequest();
     var obj = null;
+    var res_obj = {};
     xmlhttp.open('GET', 'https://maple3142-ytdl.glitch.me/api?id=' + id, false);
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4) {
             if (xmlhttp.status == 200) {
-                obj = JSON.parse(xmlhttp.responseText)['adaptive'];
-                obj = obj.filter(function(e) {
+                obj = JSON.parse(xmlhttp.responseText);
+                res_obj['audio_urls'] = obj['adaptive'].filter(function(e) {
                     return e.type.includes('audio');
                 });
+                res_obj['meta'] = obj['meta'];
             }
         }
     };
     xmlhttp.send(null);
-    return obj;
+    return res_obj;
 }
 
 function joinSession(sessionID) {
     var uid = firebase.auth().currentUser.uid;
     var userSessionRef = firebase.firestore().collection('sessions').doc(sessionID);
-    userSessionRef.update({users: firebase.firestore.FieldValue.arrayUnion(firebase.firestore().doc('/status/' + uid))})
+    userSessionRef.update({users: firebase.firestore.FieldValue.arrayUnion(firebase.firestore().doc('/status/' + uid))});
+    sessionStorage.setItem('sessionID', userSessionRef.id);
+    return userSessionRef;
 }
 
 function addSong(url) {
@@ -116,19 +123,29 @@ function addSong(url) {
         var sessionID = sessionStorage.getItem('sessionID');
         var userSessionRef = firebase.firestore().collection('sessions').doc(sessionID);
         var uid = firebase.auth().currentUser.uid;
-        userSessionRef.collection('songs').doc().set({'url': url, 'user': firebase.firestore().doc('/status/' + uid)});
+        var youtubeID = getIDFromURL(url);
+        userSessionRef.collection('songs').doc().set({'url': url, 'user': firebase.firestore().doc('/status/' + uid), 'meta': getAudio(youtubeID)['meta']});
     }
 }
 
-function createAudioSources(url, audioElement) {
+function testUID(reference, uid) {
+    firebase.firestore.document(reference)
+}
+
+function getIDFromURL(url) {
     var YouTubeRegex = /(.*?)(^|\/|v=)([a-z0-9_-]{11})(.*)?/gim;
-    var id = YouTubeRegex.exec(url)[3];
-    var source_objs = getAudio(id);
+    return YouTubeRegex.exec(url)[3];
+}
+
+function createAudioSources(url, audioElement) {
+    var id = getIDFromURL(url);
+    var source_objs = getAudio(id)['audio_urls'];
     var sources_string = '';
 
     for (var source_obj of source_objs) {
         sources_string += `<source src="${source_obj['url']}" type="${source_obj['type']}">\n`;
     }
     audioElement.innerHTML = sources_string;
+    audioElement.play();
 }
 
